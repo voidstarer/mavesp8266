@@ -56,11 +56,13 @@ MavESP8266Vehicle::MavESP8266Vehicle()
 void
 MavESP8266Vehicle::begin(MavESP8266Bridge* forwardTo)
 {
+    //getWorld()->gcsLog("MavESP8266Bridge::begin Doing");
+    //Serial.println("MavESP8266Bridge::begin Done");
     MavESP8266Bridge::begin(forwardTo);
     //-- Start UART connected to UAS
     //ESP32Serial1.println("Resizing buffer...");
     ESP32Serial1.setRxBufferSize(4096);
-    ESP32Serial1.begin(getWorld()->getParameters()->getUartBaudRate(), SERIAL_8N1, 16, 17);
+    ESP32Serial1.begin(getWorld()->getParameters()->getUartBaudRate(), SERIAL_8N1, 20, 21);
     //Serial.println("Starting Serial for UAS");
     //Serial.print("Baudrate is ");
     //Serial.println(getWorld()->getParameters()->getUartBaudRate());

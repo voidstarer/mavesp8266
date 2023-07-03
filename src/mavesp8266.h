@@ -83,7 +83,7 @@ class MavESP8266GCS;
 //-- TODO: This needs to come from the build system
 #define MAVESP8266_VERSION_MAJOR    1
 #define MAVESP8266_VERSION_MINOR    3
-#define MAVESP8266_VERSION_BUILD    0
+#define MAVESP8266_VERSION_BUILD    3
 #define MAVESP8266_VERSION          ((MAVESP8266_VERSION_MAJOR << 24) & 0xFF00000) | ((MAVESP8266_VERSION_MINOR << 16) & 0x00FF0000) | (MAVESP8266_VERSION_BUILD & 0xFFFF)
 
 //-- Debug sent out to Serial1 (GPIO02), which is TX only (no RX).
@@ -171,6 +171,7 @@ public:
     virtual MavESP8266Vehicle*      getVehicle      () = 0;
     virtual MavESP8266GCS*          getGCS          () = 0;
     virtual MavESP8266Log*          getLogger       () = 0;
+    virtual void                    gcsLog          (const char*) = 0;
 };
 
 //---------------------------------------------------------------------------------

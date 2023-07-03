@@ -41,8 +41,8 @@
 #include "mavesp8266_parameters.h"
 #include "crc.h"
 
-const char* kDEFAULT_SSID       = "ESP32_GW";
-const char* kDEFAULT_PASSWORD   = "";
+const char* kDEFAULT_SSID       = "AeroWifi";
+const char* kDEFAULT_PASSWORD   = "testtest";
 
 //-- Reserved space for EEPROM persistence. A change in this will cause all values to reset to defaults.
 #define EEPROM_SPACE            32 * sizeof(uint32_t)
@@ -209,7 +209,7 @@ MavESP8266Parameters::loadAllFromEeprom()
         Serial1.println("");
     #endif
     //-- Version if hardwired
-    _sw_version = MAVESP8266_VERSION;
+    //_sw_version = MAVESP8266_VERSION;
     _flash_left = ESP.getFreeSketchSpace();
 }
 

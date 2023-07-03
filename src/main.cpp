@@ -113,6 +113,7 @@ public:
     MavESP8266Vehicle*      getVehicle      () { return &Vehicle;       }
     MavESP8266GCS*          getGCS          () { return &GCS;           }
     MavESP8266Log*          getLogger       () { return &Logger;        }
+    void                    gcsLog          (const char *msg) { GCS.sendMessageRaw((uint8_t *)msg, strlen(msg)); } 
 };
 
 MavESP8266WorldImp      World;
@@ -182,6 +183,23 @@ void setup() {
 #endif
     Logger.begin(2048);
 
+    uint32_t vx;
+    vx = Parameters.getSwVersion();
+    Serial.printf("\nVERSION: %x Stored=%02x.%02x.%04x New=%02x.%02x.%04x\r\n", vx,
+		    ((vx & 0xFF000000)>>24), ((vx & 0x00FF0000)>>16), (vx & 0xFFFF),
+		    MAVESP8266_VERSION_MAJOR, MAVESP8266_VERSION_MINOR, MAVESP8266_VERSION_BUILD);
+    if((uint32_t)vx != (uint32_t)(MAVESP8266_VERSION)) {
+	Serial.printf("Version Mismatch Found: %x != %x\r\n", vx, MAVESP8266_VERSION);
+	// added a wait so that if something goes wrong, we can have some time to prevent it
+	Serial.printf("Resetting configuration after 15 seconds\r\n");
+	delay(15000);
+	reset_interrupt();
+	Serial.printf("Reboot in 5 seconds\r\n");
+	delay(5000);
+	return;
+    } else {
+	Serial.printf("Version Matched\r\n");
+    }
     DEBUG_LOG("\nConfiguring access point...\n");
     DEBUG_LOG("Free Sketch Space: %u\n", ESP.getFreeSketchSpace());
     Serial.println("Configuring access point/station");
@@ -195,19 +213,21 @@ void setup() {
         Serial.println("Station Mode 1");
         //WiFi.config(local_IP, gateway, subnet, 0U, 0U);
         //WiFi.begin(routerSSID, routerPWD); 
-        WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), 0U, 0U);
-        WiFi.begin(Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword());    
-#else            
+        WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), (uint8_t*)0, (uint8_t*)0);
+        //WiFi.begin(Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword());
+#else
         WiFi.mode(WIFI_STA);
         Serial.println("Station Mode 2");
-        WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), 0U, 0U);
-        WiFi.begin(Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword()); 
+        //WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), (uint8_t*)0, (uint8_t*)0);
+        //WiFi.begin(Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword()); 
 #endif
 #if defined(ARDUINO_ESP32S3_DEV) || defined(ARDUINO_ESP32C3_DEV)
-        WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), IPAddress((uint32_t)0), IPAddress((uint32_t)0));
+        //WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), IPAddress((uint32_t)0), IPAddress((uint32_t)0));
 #else
-        WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), 0U, 0U);
+        //WiFi.config(Parameters.getWifiStaIP(), Parameters.getWifiStaGateway(), Parameters.getWifiStaSubnet(), 0U, 0U);
 #endif	
+
+	Serial.printf("Connecting to %s:%s\r\n", Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword());
         WiFi.begin(Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword());
 
         //-- Wait a minute to connect
@@ -280,10 +300,20 @@ void setup() {
     Serial.print("GCS IP : ");
     Serial.println(gcs_ip);
     GCS.begin(&Vehicle, gcs_ip);
-    Serial.println("---- Starting Vehicle----");
+    //Vinod
+    for(int i=0; i<5; i++) {
+	char str[100];
+	snprintf(str, sizeof(str), "this is vinod on esp32c3 %d\n", i);
+	World.gcsLog(str);
+	delay(1000);
+    }
+    //Serial.println("---- Starting Vehicle ----");
+    World.gcsLog("---- Starting Vehicle ----\n");
     Vehicle.begin(&GCS);
+    World.gcsLog("---- Initialize Update Server ----\n");
     //-- Initialize Update Server
     updateServer.begin(&updateStatus);
+    World.gcsLog("---- Update Server started ----\n");
 }
 
 //---------------------------------------------------------------------------------
