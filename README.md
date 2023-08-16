@@ -16,7 +16,7 @@ The build enviroment is based on [PlatformIO](http://platformio.org). Follow the
 
 ```
 brew install platformio
-git clone --recursive https://github.com/markingle/mavesp8266.git
+git clone --recursive https://github.com/voidstarer/mavesp8266.git
 cd mavesp8266
 platformio run
 ```
