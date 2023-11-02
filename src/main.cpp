@@ -228,10 +228,11 @@ void setup() {
 #endif	
 
 	Serial.printf("Connecting to %s:%s\r\n", Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword());
+	Serial.println(WiFi.macAddress());
         WiFi.begin(Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword());
 
         //-- Wait a minute to connect
-        for(int i = 0; i < 120 && WiFi.status() != WL_CONNECTED; i++) {
+        for(int i = 0; i < 60 && WiFi.status() != WL_CONNECTED; i++) {
             //#ifdef ENABLE_DEBUG
             Serial.print(".");
             //#endif
@@ -241,9 +242,18 @@ void setup() {
             localIP = WiFi.localIP();
             WiFi.setAutoReconnect(true);
         } else {
+	    Serial.printf("\r\nFailed Wifi Connection to %s:%s. Rebooting\r\n", Parameters.getWifiStaSsid(), Parameters.getWifiStaPassword());
+#if 1
+    #if defined(ARDUINO_ESP32_DEV)|| defined(ARDUINO_ESP32S3_DEV) || defined(ARDUINO_ESP32C3_DEV)
+	    ESP.restart();
+    #else    
+	    ESP.reset();
+    #endif    
+#else
             //-- Fall back to AP mode if no connection could be established
             WiFi.disconnect(true);
             Parameters.setWifiMode(WIFI_MODE_AP);
+#endif
         }
     }
 
@@ -316,9 +326,22 @@ void setup() {
     World.gcsLog("---- Update Server started ----\n");
 }
 
+#define WIFI_CHECK_INTERVAL 30000
+static unsigned long previousMillis = 0;
 //---------------------------------------------------------------------------------
 //-- Main Loop
 void loop() {
+    unsigned long currentMillis = millis();
+ 
+  // if WiFi is down, try reconnecting every CHECK_WIFI_TIME seconds
+    if ((WiFi.status() != WL_CONNECTED) && ((currentMillis - previousMillis) >= WIFI_CHECK_INTERVAL)) {
+	//Serial.println(millis());
+	//Serial.println("Reconnecting to WiFi...");
+	WiFi.disconnect();
+	WiFi.reconnect();
+	previousMillis = currentMillis;
+    }
+
     if(!updateStatus.isUpdating()) {
         //Serial.println("Is Updating...");
         //delay(1000);
