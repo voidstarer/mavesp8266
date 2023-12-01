@@ -226,7 +226,7 @@ void handle_getParameters()
 static void handle_root()
 {
     String message = FPSTR(kHEADER);
-    message += "Version: ";
+    message += "AiroWifi Version: ";
     char vstr[30];
     snprintf(vstr, sizeof(vstr), "%u.%u.%u", MAVESP8266_VERSION_MAJOR, MAVESP8266_VERSION_MINOR, MAVESP8266_VERSION_BUILD);
     message += vstr;
