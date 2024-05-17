@@ -73,6 +73,7 @@ public:
         ID_HPORT,
         ID_CPORT,
         ID_IPADDRESS,
+        ID_GCSADDRESS,
         ID_SSID1,
         ID_SSID2,
         ID_SSID3,
@@ -118,6 +119,7 @@ public:
     uint32_t    getWifiStaSubnet            ();
     uint32_t    getUartBaudRate             ();
     int8_t      getRawEnable                ();
+    uint32_t    getGCSIP                    ();
 
     void        setDebugEnabled             (int8_t enabled);
     void        setWifiMode                 (int8_t mode);
@@ -133,6 +135,8 @@ public:
     void        setWifiStaSubnet            (uint32_t addr);
     void        setUartBaudRate             (uint32_t baud);
     void        setLocalIPAddress           (uint32_t ipAddress);
+    void        setGCSIPAddress             (uint32_t ipAddress);
+
 
     stMavEspParameters* getAt               (int index);
 
