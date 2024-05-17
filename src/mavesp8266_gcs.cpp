@@ -85,7 +85,7 @@ MavESP8266GCS::readMessage()
     }
     uint32_t now = millis();
     //-- Update radio status (1Hz)
-    if(_heard_from && (now - _last_status_time > 1000)) {
+    if(_heard_from && (now - _last_status_time > 10000)) {
         delay(0);
         _sendRadioStatus();
         _last_status_time = millis();
@@ -252,6 +252,21 @@ MavESP8266GCS::sendMessage(mavlink_message_t* message) {
     return 1;
 }
 
+WiFiUDP             airostat;
+void
+MavESP8266GCS::sendAiroStat(uint8_t sid, struct linkStatus *veh, struct linkStatus *gcs)
+{
+    char buffer[1024];
+    int n = snprintf(buffer, sizeof(buffer), "{\"sid\":\"%d\",\"veh\":{\"received\":\"%u\",\"lost\":\"%u\",\"sent\":\"%u\",\"errors\":\"%u\",\"status_sent\":\"%u\",\"queue_status\":\"%u\"},\"gcs\":{\"received\":\"%u\",\"lost\":\"%u\",\"sent\":\"%u\",\"errors\":\"%u\",\"status_sent\":\"%u\",\"queue_status\":\"%u\"}}", sid, veh->packets_received, veh->packets_lost, veh->packets_sent, veh->parse_errors, veh->radio_status_sent, veh->queue_status, gcs->packets_received, gcs->packets_lost, gcs->packets_sent, gcs->parse_errors, gcs->radio_status_sent, gcs->queue_status);
+    if(n >= sizeof(buffer)) {
+	 n = sizeof(buffer)-1;
+    }
+    IPAddress bcast(255,255,255,255);
+    airostat.beginPacket(bcast, 2000);
+    size_t sent = airostat.write((uint8_t*)buffer, n);
+    airostat.endPacket();
+}
+
 int
 MavESP8266GCS::sendMessageRaw(uint8_t *buffer, int len)
 {
@@ -270,6 +285,7 @@ MavESP8266GCS::_sendRadioStatus()
     uint8_t rssi = 0;
     uint8_t lostVehicleMessages = 100;
     uint8_t lostGcsMessages = 100;
+    uint8_t sid = _forwardTo->systemID();
 #if defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_ESP32S3_DEV) || defined(ARDUINO_ESP32C3_DEV)
     {
         wifi_mode_t mode;
@@ -294,7 +310,7 @@ MavESP8266GCS::_sendRadioStatus()
     //-- Build message
     mavlink_message_t msg;
     mavlink_msg_radio_status_pack_chan(
-        _forwardTo->systemID(),
+        sid,
         MAV_COMP_ID_UDP_BRIDGE,
         _forwardTo->_recv_chan,
         &msg,
@@ -307,6 +323,7 @@ MavESP8266GCS::_sendRadioStatus()
         0                       // We don't fix anything
     );
 
+    // sendAiroStat(sid, st, &_status);
     _sendSingleUdpMessage(&msg);
     _status.radio_status_sent++;
 }
@@ -342,4 +359,9 @@ void MavESP8266GCS::_send_pending(void)
             _packets_queued = 0;
         }
     }
+}
+
+void MavESP8266GCS::setGCSIPAddress(IPAddress ip)
+{
+    _ip = ip;
 }

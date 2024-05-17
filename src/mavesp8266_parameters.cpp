@@ -41,7 +41,7 @@
 #include "mavesp8266_parameters.h"
 #include "crc.h"
 
-const char* kDEFAULT_SSID       = "AeroWifi";
+const char* kDEFAULT_SSID       = "AiroWifi";
 const char* kDEFAULT_PASSWORD   = "testtest";
 
 //-- Reserved space for EEPROM persistence. A change in this will cause all values to reset to defaults.
@@ -55,6 +55,7 @@ uint32_t    _wifi_channel;
 uint16_t    _wifi_udp_hport;
 uint16_t    _wifi_udp_cport;
 uint32_t    _wifi_ip_address;
+uint32_t    _gcs_ip_address;
 char        _wifi_ssid[16];
 char        _wifi_password[16];
 char        _wifi_ssidsta[16];
@@ -76,6 +77,7 @@ int8_t      _raw_enable;
      {"WIFI_UDP_HPORT",     &_wifi_udp_hport,       MavESP8266Parameters::ID_HPORT,     sizeof(uint16_t),   MAV_PARAM_TYPE_UINT16,  false},
      {"WIFI_UDP_CPORT",     &_wifi_udp_cport,       MavESP8266Parameters::ID_CPORT,     sizeof(uint16_t),   MAV_PARAM_TYPE_UINT16,  false},
      {"WIFI_IPADDRESS",     &_wifi_ip_address,      MavESP8266Parameters::ID_IPADDRESS, sizeof(uint32_t),   MAV_PARAM_TYPE_UINT32,  true },
+     {"GCS_IPADDRESS",      &_gcs_ip_address,       MavESP8266Parameters::ID_GCSADDRESS, sizeof(uint32_t),   MAV_PARAM_TYPE_UINT32,  true },
      {"WIFI_SSID1",         &_wifi_ssid[0],         MavESP8266Parameters::ID_SSID1,     sizeof(uint32_t),   MAV_PARAM_TYPE_UINT32,  false},
      {"WIFI_SSID2",         &_wifi_ssid[4],         MavESP8266Parameters::ID_SSID2,     sizeof(uint32_t),   MAV_PARAM_TYPE_UINT32,  false},
      {"WIFI_SSID3",         &_wifi_ssid[8],         MavESP8266Parameters::ID_SSID3,     sizeof(uint32_t),   MAV_PARAM_TYPE_UINT32,  false},
@@ -126,6 +128,13 @@ MavESP8266Parameters::setLocalIPAddress(uint32_t ipAddress)
     _wifi_ip_address = ipAddress;
 }
 
+void
+MavESP8266Parameters::setGCSIPAddress(uint32_t ipAddress)
+{
+    _gcs_ip_address = ipAddress;
+}
+
+
 //---------------------------------------------------------------------------------
 //-- Array accessor
 stMavEspParameters*
@@ -154,6 +163,7 @@ uint32_t    MavESP8266Parameters::getWifiStaGateway () { return _wifi_gatewaysta
 uint32_t    MavESP8266Parameters::getWifiStaSubnet  () { return _wifi_subnetsta;    }
 uint32_t    MavESP8266Parameters::getUartBaudRate   () { return _uart_baud_rate;    }
 int8_t      MavESP8266Parameters::getRawEnable      () { return _raw_enable;        }
+uint32_t    MavESP8266Parameters::getGCSIP      () { return _gcs_ip_address;        }
 
 //---------------------------------------------------------------------------------
 //-- Reset all to defaults

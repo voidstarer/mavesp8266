@@ -185,9 +185,9 @@ void setup() {
 
     uint32_t vx;
     vx = Parameters.getSwVersion();
-    Serial.printf("\nVERSION: %x Stored=%02x.%02x.%04x New=%02x.%02x.%04x\r\n", vx,
+    Serial.printf("\nVERSION: %x Stored=%02x.%02x.%04x New=%02x.%02x.%04x Baud:%lu\r\n", vx,
 		    ((vx & 0xFF000000)>>24), ((vx & 0x00FF0000)>>16), (vx & 0xFFFF),
-		    MAVESP8266_VERSION_MAJOR, MAVESP8266_VERSION_MINOR, MAVESP8266_VERSION_BUILD);
+		    MAVESP8266_VERSION_MAJOR, MAVESP8266_VERSION_MINOR, MAVESP8266_VERSION_BUILD, Parameters.getUartBaudRate());
     if((uint32_t)vx != (uint32_t)(MAVESP8266_VERSION)) {
 	Serial.printf("Version Mismatch Found: %x != %x\r\n", vx, MAVESP8266_VERSION);
 	// added a wait so that if something goes wrong, we can have some time to prevent it

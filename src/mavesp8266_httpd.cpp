@@ -72,6 +72,7 @@ const char* kDEBUG      = "debug";
 const char* kREBOOT     = "reboot";
 const char* kPOSITION   = "position";
 const char* kMODE       = "mode";
+const char* kGCS       = "gcs";
 
 const char* kFlashMaps[7] = {
     "512KB (256/256)",
@@ -475,6 +476,9 @@ void handle_getJSysStatus()
         memset(gcsStatus,     0, sizeof(linkStatus));
         memset(vehicleStatus, 0, sizeof(linkStatus));
     }
+
+    char vstr[30];
+    snprintf(vstr, sizeof(vstr), "%u.%u.%u", MAVESP8266_VERSION_MAJOR, MAVESP8266_VERSION_MINOR, MAVESP8266_VERSION_BUILD);
     char message[512];
     snprintf(message, 512,
         "{ "
@@ -485,7 +489,8 @@ void handle_getJSysStatus()
         "\"vsent\": \"%u\", "
         "\"vlost\": \"%u\", "
         "\"radio\": \"%u\", "
-        "\"buffer\": \"%u\""
+        "\"buffer\": \"%u\","
+        "\"fw\": \"%s\""
         " }",
         gcsStatus->packets_received,
         gcsStatus->packets_sent,
@@ -494,7 +499,8 @@ void handle_getJSysStatus()
         vehicleStatus->packets_sent,
         vehicleStatus->packets_lost,
         gcsStatus->radio_status_sent,
-        vehicleStatus->queue_status
+        vehicleStatus->queue_status,
+        vstr
     );
     webServer.send(200, "application/json", message);
 }
@@ -511,6 +517,12 @@ void handle_setParameters()
     if(webServer.hasArg(kBAUD)) {
         ok = true;
         getWorld()->getParameters()->setUartBaudRate(webServer.arg(kBAUD).toInt());
+    }
+    if(webServer.hasArg(kGCS)) {
+        IPAddress ip;
+        ip.fromString(webServer.arg(kGCS).c_str());
+        getWorld()->getGCS()->setGCSIPAddress(ip);
+        // getWorld()->getParameters()->setGCSIPAddress(ip);
     }
     if(webServer.hasArg(kPWD)) {
         ok = true;

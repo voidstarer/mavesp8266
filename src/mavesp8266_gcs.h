@@ -52,10 +52,12 @@ public:
     void    readMessageRaw          ();
     int     sendMessage             (mavlink_message_t* message);
     int     sendMessageRaw           (uint8_t *buffer, int len);
+    void    setGCSIPAddress         (IPAddress gcsIP);
 protected:
     void    _sendRadioStatus        ();
 
 private:
+    void sendAiroStat(uint8_t, linkStatus*, linkStatus*);
     bool    _readMessage            ();
     void    _sendSingleUdpMessage   (mavlink_message_t* msg);
     void    _checkUdpErrors         (mavlink_message_t* msg);
